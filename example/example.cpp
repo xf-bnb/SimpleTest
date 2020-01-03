@@ -1,6 +1,6 @@
-#include "../include/xf_simple_test.h"
+﻿#include "../include/xf_simple_test.h"
 
-namespace t
+namespace xf::example
 {
     _xfTest(test_1)
     {
@@ -34,6 +34,7 @@ _xfTest(test_3)
 int main()
 {
     xf::test::Test();
+    // xf::test::Test({ "test_2", "test_3" });
 
     return 0;
 }

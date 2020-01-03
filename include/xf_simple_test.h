@@ -1,4 +1,4 @@
-/*
+﻿/*
 A simple C++ testing framework
 version 1.0.0
 https://github.com/xf-bnb/SimpleTest

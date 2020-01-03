@@ -1,3 +1,13 @@
+/*
+A simple C++ testing framework
+version 1.0.0
+https://github.com/xf-bnb/SimpleTest
+
+Licensed under the MIT License <http://opensource.org/licenses/MIT>.
+SPDX - License - Identifier : MIT
+Copyright(c) 2019 Frank Xiong <https://github.com/xf-bnb>.
+*/
+
 #pragma once
 
 #include <map>

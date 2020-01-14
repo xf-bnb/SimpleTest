@@ -1,6 +1,6 @@
 ﻿/*
 A simple C++ testing framework
-version 1.0.0
+version 1.0.1
 https://github.com/xf-bnb/SimpleTest
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
@@ -19,7 +19,7 @@ Copyright(c) 2019 Frank Xiong <https://github.com/xf-bnb>.
 namespace xf::test
 {
 
-    const char* version() { return "1.0.0"; }
+    inline const char* version() { return "1.0.1"; }
 
     class TestInfo final
     {
@@ -47,10 +47,12 @@ namespace xf::test
 
         const auto& Result() const { return _result; }
 
-        void Run() const
+        unsigned int Run() const
         {
             for (const auto& [name, func] : _FuncMap)
                 _run(name, func);
+
+            return (unsigned int)(_FuncMap.size());
         }
 
         bool Run(const std::string& key) const
@@ -62,6 +64,22 @@ namespace xf::test
             }
 
             return false;
+        }
+
+        unsigned int Run(const std::vector<std::string>& keys)
+        {
+            unsigned int n(0);
+
+            for (const auto& key : keys)
+            {
+                if (auto iter = _FuncMap.find(key); iter != _FuncMap.end())
+                {
+                    _run(iter->first, iter->second);
+                    ++n;
+                }
+            }
+
+            return n;
         }
 
         bool Add(const std::string& key, _func_type func)
@@ -83,15 +101,15 @@ namespace xf::test
 
     };  // class TestInfo
 
-    void Show(unsigned int n, unsigned int success, unsigned int failed, long long ms)
+    inline void Show(std::size_t n, std::size_t success, std::size_t failed, std::uint64_t ms)
     {
         std::cout << std::endl;
         std::cout << "==> Ran " << (success + failed) << " tests from " << n << " test case: "
             << success << " successes, " << failed << " failures, spend " << ms << " ms." << std::endl;
-        std::cout << "==> Test Result: " << (0 == failed ? "SUCCESS." : "FAIL.") << std::endl;
+        std::cout << "==> Test Result: " << (0 == failed ? "SUCCESS." : "FAIL.") << std::endl << std::endl;
     }
 
-    bool Assert(bool result, const std::string& name, const std::string& file, unsigned int line)
+    inline bool Assert(bool result, const std::string& name, const std::string& file, unsigned int line)
     {
         TestInfo::Instance().Counting(result);
         if (!result)
@@ -103,25 +121,27 @@ namespace xf::test
         return result;
     }
 
-    void Test()
+    template<typename _FuncType>
+    unsigned int _test(_FuncType func)
     {
         auto t1 = std::chrono::system_clock::now();
-        TestInfo::Instance().Run();
+        unsigned int n = func();
         auto t2 = std::chrono::system_clock::now();
 
         const auto& [success, failed] = TestInfo::Instance().Result();
-        Show(TestInfo::Instance().Size(), success, failed, std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count());
+        Show(n, success, failed, std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count());
+
+        return failed;
     }
 
-    void Test(const std::vector<std::string>& names)
+    inline unsigned int Test()
     {
-        auto t1 = std::chrono::system_clock::now();
-        for (const auto& name : names)
-            TestInfo::Instance().Run(name);
-        auto t2 = std::chrono::system_clock::now();
+        return _test([]() { return TestInfo::Instance().Run(); });
+    }
 
-        const auto& [success, failed] = TestInfo::Instance().Result();
-        Show(names.size(), success, failed, std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count());
+    inline unsigned int Test(const std::vector<std::string>& names)
+    {
+        return _test([&names]() { return TestInfo::Instance().Run(names); });
     }
 
 }   // namespace xf::test
@@ -131,10 +151,10 @@ namespace xf::test
 
 #define _xfAddTest(key, func) xf::test::TestInfo::Instance().Add(key, func)
 
-#define _xfTest(key) _xfDeclareTestFunc(key); \
-auto _xfConcatenateName(_test_variable_name_, key) = \
-_xfAddTest(#key, _xfConcatenateName(_test_function_name_, key)); \
-_xfDeclareTestFunc(key)
+#define _xfTest(key) _xfDeclareTestFunc(key);                            \
+        auto _xfConcatenateName(_test_variable_name_, key) =             \
+        _xfAddTest(#key, _xfConcatenateName(_test_function_name_, key)); \
+        _xfDeclareTestFunc(key)
 
 #define _xfExpect(expr) xf::test::Assert(expr, name, __FILE__, __LINE__)
 #define _xfAssert(expr) if (!xf::test::Assert(expr, name, __FILE__, __LINE__)) return

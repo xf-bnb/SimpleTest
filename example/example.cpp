@@ -33,8 +33,6 @@ _xfTest(test_3)
 
 int main()
 {
-    xf::test::Test();
-    // xf::test::Test({ "test_2", "test_3" });
-
-    return 0;
+    return xf::test::Test();
+    // return xf::test::Test({ "test_2", "test_3" });
 }

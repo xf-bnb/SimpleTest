@@ -1,7 +1,7 @@
 ## SimpleTest
 一个简单的C++测试框架
 
-### Version: 1.0.0
+### Version: 1.0.1
 
 ### Integration
 将位于`include`目录中的 [xf_simple_test.h](include/xf_simple_test.h) 头文件拷贝到自己的项目中即可。
@@ -25,10 +25,12 @@
   ```c++
     int main()
     {
-        xf::test::Test();
-        // xf::test::Test({"test_1"});
-
-        return 0;
+	    /*
+		 * 建议将测试结果作为测试程序的返回码
+		 * 如果测试成功返回码为0，否则为失败的测试用例数量。
+		 */
+        return xf::test::Test();
+        // return xf::test::Test({"test_1"});
     }
   ```
 * 示例输出：
